@@ -1,0 +1,7 @@
+# this module will be install in <root>/com/hempnall
+# therefore the package should be called com.hempnall.dbui
+module com.hempnall.dbui
+
+plugin dbui
+
+LocalStorageCombo 1.0 LocalStorageCombo.qml
