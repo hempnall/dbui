@@ -4,6 +4,7 @@
 #include <QStringList>
 #include <QSqlTableModel>
 
+class LocalStorageTable;
 
 /// see wiki.qt.io/QML_and_QSqlTableModel
 class LocalStorageTableModel
@@ -19,7 +20,7 @@ public:
 
 
     LocalStorageTableModel(QObject* parent = 0);
-    LocalStorageTableModel(QObject* parent, QSqlDatabase db, const QString& str,bool addNew);
+    LocalStorageTableModel(QObject* parent, QSqlDatabase db, const QString& str,bool addNew,const QString& addNewText);
     ~LocalStorageTableModel();
 
     Q_INVOKABLE QVariant data(const QModelIndex &index, int role=Qt::DisplayRole ) const;
@@ -51,6 +52,7 @@ signals:
     void currentItemChanged(int newCurrentItem);
     void lastRowAddedIndexChanged();
 
+
 private:
 
     void updateAddRowIndex();
@@ -59,11 +61,14 @@ private:
     bool addRowEnabled_;
     int addRowIndex_;
     int nextIdValue_;
+    QString addNewText_;
 
     bool filterApplied_;
     QString foreignKeyFieldId_;
     QString foreignKeyFieldName_;
     int lastRowAddedIndex_;
+    void dataNotFound();
+    LocalStorageTable* parentTable_;
 
 
 

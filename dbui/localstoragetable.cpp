@@ -1,16 +1,21 @@
 #include "localstoragedatabase.h"
 #include "localstoragetable.h"
 #include "localstoragetablemodel.h"
-
+#include <QDebug>
 
 LocalStorageTable::LocalStorageTable()
+    : addNew_(false)
 {
 
 }
 
 LocalStorageTable::LocalStorageTable(  QQuickItem* parent)
-      : QQuickItem(parent)
+      : QQuickItem(parent),addNew_(false)
 {
+
+}
+
+LocalStorageTable::~LocalStorageTable() {
 
 }
 
@@ -47,7 +52,7 @@ QSqlTableModel *LocalStorageTable::model() const
 {
     QSqlDatabase database = LocalStorageDatabase::openDatabase(database_);
 
-    QSqlTableModel * model = new LocalStorageTableModel((QObject*) this,database,tableName_,addNew_);
+    QSqlTableModel * model = new LocalStorageTableModel((QObject*) this,database,tableName_,addNew_,addNewText_);
 
     return model;
 }
@@ -74,6 +79,22 @@ bool LocalStorageTable::addNew() const
 void LocalStorageTable::setAddNew(bool addNew)
 {
     addNew_ = addNew;
+}
+
+QString LocalStorageTable::addNewText() const
+{
+
+    return addNewText_;
+}
+
+void LocalStorageTable::setAddNewText(const QString &addNewText)
+{
+    if (!addNewText.isEmpty()) {
+        setAddNew(true);
+    } else {
+        setAddNew(false);
+    }
+    addNewText_ = addNewText;
 }
 
 

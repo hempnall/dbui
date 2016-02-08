@@ -20,10 +20,12 @@ class LocalStorageTable
     Q_PROPERTY(QSqlTableModel* model READ model )
     Q_PROPERTY(QStringList headers READ headers WRITE setHeaders)
     Q_PROPERTY(bool addNew READ addNew WRITE setAddNew NOTIFY addNewChanged)
+    Q_PROPERTY(QString addNewText READ addNewText WRITE setAddNewText NOTIFY addNewTextChanged)
 
 public:
     LocalStorageTable();
     LocalStorageTable(QQuickItem *parent );
+    ~LocalStorageTable();
 
     QString tableName() const;
     void setTableName(const QString &tableName);
@@ -39,11 +41,15 @@ public:
     bool addNew() const;
     void setAddNew(bool addNew);
 
+    QString addNewText() const;
+    void setAddNewText(const QString &addNewText);
+
 signals:
     void tableNameChanged();
     void databaseChanged();
     void addNewChanged();
-
+    void dataNotFound();
+    void addNewTextChanged();
 
 private:
 
@@ -51,6 +57,7 @@ private:
     QString database_;
     QStringList headers_;
     bool addNew_;
+    QString addNewText_;
 
 
 

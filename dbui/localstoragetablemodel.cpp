@@ -2,8 +2,12 @@
 #include <QDebug>
 #include <QSqlRecord>
 #include <QSqlQuery>
+#include <localstoragetable.h>
 
-LocalStorageTableModel::LocalStorageTableModel(QObject *parent) {
+LocalStorageTableModel::LocalStorageTableModel(QObject *parent)
+    : QSqlTableModel(parent)
+{
+    parentTable_ = dynamic_cast<LocalStorageTable*>(parent);
 }
 
 
@@ -11,19 +15,23 @@ LocalStorageTableModel::LocalStorageTableModel(
         QObject *parent,
         QSqlDatabase database,
         const QString& tableName,
-        bool addNew
+        bool addNew,
+        const QString& addNewText
         )
     : QSqlTableModel(parent,database),
       addRowEnabled_(addNew),
       addRowIndex_(-1),
       filterApplied_(false),
       nextIdValue_(-1),
-      lastRowAddedIndex_(-1)
+      lastRowAddedIndex_(-1),
+      addNewText_(addNewText)
 {
+    parentTable_ = dynamic_cast<LocalStorageTable*>(parent);
     setTable(tableName);
     setEditStrategy(QSqlTableModel::OnManualSubmit);
     select();
     generateRoleNames();
+
     if (addNew) {
      updateAddRowIndex();
     }
@@ -55,6 +63,12 @@ QVariant LocalStorageTableModel::data(const QModelIndex &index, int role) const
 
 }
 
+void LocalStorageTableModel::dataNotFound()     {
+    if (nullptr != parentTable_) {
+        emit parentTable_->dataNotFound();
+    }
+}
+
 int LocalStorageTableModel::idForIndex(int id,const QString& role)
 {
     if (id == -1) {
@@ -77,31 +91,39 @@ QString LocalStorageTableModel::textForIndex(int row_index,const QString& role)
 {
 
     if (row_index == -1) {
-        return "<null>";
+        dataNotFound();
+        return "";
     }
+
 
     int fieldIdx = fieldIndex(role);
     if (fieldIdx == -1) {
-        return "<null>";
+        dataNotFound();
+        return "";
     }
 
     QModelIndex idx = index(row_index, fieldIdx);
     QVariant indexData = data(idx,Qt::DisplayRole);
+    if (!indexData.isValid()) {
+        dataNotFound();
+    }
 
     return indexData.toString();
 }
 
 QSqlTableModel* LocalStorageTableModel::filter(const QString &field_name, const int field_value)
 {
-    int previous_row_count = rowCount();
+    int previous_row_count = QSqlTableModel::rowCount();
     beginRemoveRows(QModelIndex(),0,qMax(0,previous_row_count -1));
     endRemoveRows();
 
     QString filter_text = field_name + "=" + QString::number( field_value );
     setFilter(filter_text);
+
     if (addRowEnabled_) {
         updateAddRowIndex();
     }
+
     return this;
 }
 
@@ -143,11 +165,9 @@ void LocalStorageTableModel::addRowWithFK(
         database().commit();
         setLastRowAddedIndex(rowPosAfterAdd);
         updateAddRowIndex();
-        qDebug() << newRecord;
 
     } else {
 
-        qDebug() << "failed";
         database().rollback();
 
     }
@@ -177,7 +197,6 @@ int LocalStorageTableModel::rowCount(const QModelIndex &parent) const
     } else {
         return QSqlTableModel::rowCount();
     }
-
 }
 
 bool LocalStorageTableModel::addRowEnabled() const
@@ -200,7 +219,6 @@ int LocalStorageTableModel::addRowIndex()
 void LocalStorageTableModel::updateAddRowIndex()
 {
     addRowIndex_ = QSqlTableModel::rowCount();
-    qDebug() << "addRowIndex = " << addRowIndex_;
     emit addRowIndexChanged();
 }
 
@@ -221,9 +239,8 @@ int LocalStorageTableModel::lastRowAddedIndex() const
 
 void LocalStorageTableModel::setLastRowAddedIndex(int lastRowAddedIndex)
 {
-    qDebug() << "last row added = " << lastRowAddedIndex;
+
     if (lastRowAddedIndex != lastRowAddedIndex_) {
-        qDebug() << "last row added = (emit emit)";
         lastRowAddedIndex_ = lastRowAddedIndex;
         emit lastRowAddedIndexChanged();
     }

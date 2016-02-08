@@ -1,11 +1,15 @@
 #include "localstoragedatabase.h"
 #include <QCryptographicHash>
 #include <QDir>
+#include <QFile>
 #include <QString>
 #include <QDebug>
 #include <QSettings>
 #include <QSqlDatabase>
+#include <QQmlEngine>
 #include "localstoragedatabaseexception.h"
+
+
 
 static QString qmlsqldatabase_databasesPath(const QString& offline_storage_path)
 {
@@ -24,6 +28,82 @@ static void qmlsqldatabase_initDatabasesPath(const QString& offline_storage_path
 static QString qmlsqldatabase_databaseFile(const QString& connectionName, const QString& offline_storage_path)
 {
     return qmlsqldatabase_databasesPath(offline_storage_path) + QDir::separator() + connectionName;
+}
+
+LocalStorageDatabase::LocalStorageDatabase()
+{
+
+}
+
+LocalStorageDatabase::LocalStorageDatabase(QQuickItem *parent)
+    : QQuickItem(parent)
+{
+
+}
+
+bool LocalStorageDatabase::create(const QString &dbname)
+{
+    try {
+        if (exists(dbname)) {
+            return false;
+        }
+        QString offlineStoragePath = getLocalStoragePath();
+        LocalStorageDatabase::openDatabase(offlineStoragePath,dbname);
+        return true;
+    } catch (LocalStorageDatabaseException& ex) {
+
+        return false;
+    }
+}
+
+bool LocalStorageDatabase::exists(const QString &dbname)
+{
+
+    QString offlineStoragePath = getLocalStoragePath();
+    QString basename = getDatabaseBasename(  offlineStoragePath  ,dbname);
+
+    return QFile::exists(basename+QLatin1String(".sqlite")) || QFile::exists(basename+QLatin1String(".ini"));
+
+}
+
+bool LocalStorageDatabase::remove(const QString &dbname)
+{
+
+    try {
+
+        if (!exists(dbname)) {
+            return false;
+        }
+
+        QString offlineStoragePath = getLocalStoragePath();
+        QString basename = getDatabaseBasename( offlineStoragePath , dbname);
+
+        QFile::remove(basename+QLatin1String(".sqlite"));
+        QFile::remove(basename+QLatin1String(".ini"));
+
+        return true;
+
+    } catch (LocalStorageDatabaseException& ex) {
+
+        return false;
+
+    }
+}
+
+bool LocalStorageDatabase::forcedelete(const QString &dbname)
+{
+
+    try {
+        QString offlineStoragePath = getLocalStoragePath();
+        QString basename = getDatabaseBasename(offlineStoragePath,dbname);
+        QFile::remove(basename+QLatin1String(".sqlite"));
+        QFile::remove(basename+QLatin1String(".ini"));
+        return true;
+    } catch (LocalStorageDatabaseException& ex) {
+
+
+        return false;
+    }
 }
 
 QSqlDatabase LocalStorageDatabase::openDatabase(
@@ -89,6 +169,7 @@ QSqlDatabase LocalStorageDatabase::openDatabase(QSqlDatabase db)
 
 QSqlDatabase LocalStorageDatabase::openDatabase(const QString &name)
 {
+
     QSqlDatabase database;
     QString hash_name = getDatabaseId(name);
     if (QSqlDatabase::connectionNames().contains(hash_name)) {
@@ -97,6 +178,25 @@ QSqlDatabase LocalStorageDatabase::openDatabase(const QString &name)
     } else {
         throw LocalStorageDatabaseException("unable to open database - although it should really be open");
     }
+}
+
+QString LocalStorageDatabase::getDatabaseBasename(const QString &storagePath, const QString &dbname)
+{
+    QCryptographicHash md5(QCryptographicHash::Md5);
+    md5.addData(dbname.toUtf8());
+    QString dbid(QLatin1String(md5.result().toHex()));
+    QString basename = qmlsqldatabase_databaseFile(dbid, storagePath);
+    return basename;
+}
+
+QString LocalStorageDatabase::getLocalStoragePath()
+{
+    QQmlEngine* engine =  qmlEngine(this);
+    if (!engine) {
+        throw LocalStorageDatabaseException("not running within the context of a qmlengine");
+    }
+    QString offlineStoragePath = engine->offlineStoragePath();
+    return offlineStoragePath;
 }
 
 QString LocalStorageDatabase::getDatabaseId(const QString &name)

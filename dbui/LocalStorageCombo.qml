@@ -35,13 +35,16 @@ Item {
     }
 
     function accept_edit(text,fkFieldName,fkFieldValue) {
+
         if (fkFieldName == "") {
             main.model.addRow(item.idRole, item.textRole, text);
         } else {
             main.model.addRowWithFK(item.idRole, item.textRole, text, fkFieldName,fkFieldValue);
         }
+
         hideEditBox();
         current_state = state_identity;
+        console.log(main.model.lastRowAddedIndex);
         main.currentIndex = main.model.lastRowAddedIndex;
         return state_combo;
     }
@@ -54,6 +57,7 @@ Item {
     }
 
     function combo_to_addnew(arg) {
+        console.trace();
         edit.focus = true;
         edit.visible = true;
         edit.forceActiveFocus();
@@ -160,8 +164,15 @@ Item {
             focus: true
             activeFocusOnPress: true
 
+
             onCurrentIndexChanged: {
                 current_state = transition(transition_comboselected,currentIndex);
+            }
+
+            onPressedChanged: {
+                if (pressed) {
+                    current_state = transition(transition_comboselected,currentIndex);
+                }
             }
 
         }
@@ -204,7 +215,7 @@ Item {
     function filterItems(str,id) {
         edit.fkFieldName = str;
         edit.fkFieldValue = id;
-        main.model = table.model.filter(str,id)
+     //   main.model = table.model.filter(str,id)
     }
 
     signal selectionChanged(int row, int id,string name)
