@@ -17,10 +17,12 @@ class LocalStorageTable
 
     Q_PROPERTY(QString tableName READ tableName WRITE setTableName NOTIFY tableNameChanged)
     Q_PROPERTY(QString database READ database WRITE setDatabase NOTIFY databaseChanged)
-    Q_PROPERTY(QSqlTableModel* model READ model )
+    Q_PROPERTY(QSqlTableModel* model READ model NOTIFY modelChanged)
     Q_PROPERTY(QStringList headers READ headers WRITE setHeaders)
     Q_PROPERTY(bool addNew READ addNew WRITE setAddNew NOTIFY addNewChanged)
-    Q_PROPERTY(QString addNewText READ addNewText WRITE setAddNewText NOTIFY addNewTextChanged)
+    Q_PROPERTY(bool sorted READ sorted WRITE setSorted NOTIFY sortedChanged)
+    Q_PROPERTY(QString sortRole READ sortRole WRITE setSortRole NOTIFY sortRoleChanged)
+
 
 public:
     LocalStorageTable();
@@ -41,8 +43,12 @@ public:
     bool addNew() const;
     void setAddNew(bool addNew);
 
-    QString addNewText() const;
-    void setAddNewText(const QString &addNewText);
+
+    bool sorted() const;
+    void setSorted(bool sorted);
+
+    QString sortRole() const;
+    void setSortRole(const QString &sortRole);
 
 signals:
     void tableNameChanged();
@@ -50,16 +56,18 @@ signals:
     void addNewChanged();
     void dataNotFound();
     void addNewTextChanged();
+    void modelChanged();
+    void sortedChanged();
+    void sortRoleChanged();
 
 private:
 
     QString tableName_;
     QString database_;
+    QString sortRole_;
     QStringList headers_;
     bool addNew_;
-    QString addNewText_;
-
-
+    bool sorted_;
 
 
 public slots:

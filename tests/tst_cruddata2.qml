@@ -21,14 +21,13 @@ TestCase {
         id: sections_addnew
         tableName: "Sections"
         database: "QQmlExampleDB"
-        addNewText: parent.addNewText
+        addNew: true
     }
 
     LocalStorageTable {
         id: items_addnew
         tableName: "Items"
         database: "QQmlExampleDB"
-        addNewText: parent.addNewText
     }
 
     function initTestCase() {
@@ -50,18 +49,16 @@ TestCase {
         compare(  sections_addnew.model.textForIndex(0,"section_name") ,"dairy" );
         compare( sections_addnew.model.textForIndex(2,"section_name"),"meat"  );
         compare(  spy_add_new.count,0);
-        compare( sections_addnew.model.textForIndex(3,"section_name") , addNewText  );
         compare(sections_addnew.model.textForIndex(-1,"section_name") ,  ""  );
         compare(spy_add_new.count,1);
     }
 
     function test_b_addnew_record() {
 
-        compare( sections_addnew.addNewText , addNewText  );
         compare( sections_addnew.addNew , true );
 
         sections_addnew.model.addRow("section_id","section_name","beauty");
-        compare( sections_addnew.model.rowCount(), 5);
+        compare( sections_addnew.model.rowCount(), 4);
 
 
 
@@ -71,27 +68,27 @@ TestCase {
     function test_c_filtering() {
 
         var filtered  = items_addnew.model.filter("section_id",1);
-        compare( filtered.rowCount() , 4 );
+        compare( filtered.rowCount() , 3 );
         filtered.addRowWithFK("item_id","item_name","cream","section_id",1);
-        compare( filtered.rowCount() , 5 );
+        compare( filtered.rowCount() , 4 );
 
         filtered = items_addnew.model.filter("section_id",1);
-        compare( filtered.rowCount() , 5 );
-
-        filtered = items_addnew.model.filter("section_id",2);
         compare( filtered.rowCount() , 4 );
 
-        filtered = items_addnew.model.filter("section_id",4);
-        compare( filtered.rowCount() , 1 );
-        filtered.addRowWithFK("item_id","item_name","lipstick","section_id",4);
-        compare( filtered.rowCount() , 2 );
-        filtered.addRowWithFK("item_id","item_name","wash","section_id",4);
+        filtered = items_addnew.model.filter("section_id",2);
         compare( filtered.rowCount() , 3 );
 
+        filtered = items_addnew.model.filter("section_id",4);
+        compare( filtered.rowCount() , 0 );
+        filtered.addRowWithFK("item_id","item_name","lipstick","section_id",4);
+        compare( filtered.rowCount() , 1 );
+        filtered.addRowWithFK("item_id","item_name","wash","section_id",4);
+        compare( filtered.rowCount() , 2 );
+
         filtered  = items_addnew.model.filter("section_id",1);
-        compare( filtered.rowCount() , 5 );
+        compare( filtered.rowCount() , 4 );
         filtered.addRowWithFK("item_id","item_name","dairylea","section_id",1);
-        compare( filtered.rowCount() , 6 );
+        compare( filtered.rowCount() , 5 );
     }
 
 

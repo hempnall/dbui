@@ -44,7 +44,7 @@ TestCase {
         compare(sections.model.textForIndex(-1,"section_name") ,  ""  );
         compare(spy.count,2);
         compare(  sections.addNew , false );
-        compare(  sections.addNewText , "" );
+
         compare( sections.model.rowCount(), 3);
     }
 

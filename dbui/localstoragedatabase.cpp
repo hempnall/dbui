@@ -167,7 +167,7 @@ QSqlDatabase LocalStorageDatabase::openDatabase(QSqlDatabase db)
 
 }
 
-QSqlDatabase LocalStorageDatabase::openDatabase(const QString &name)
+QSqlDatabase LocalStorageDatabase::openDatabase(const QString &name,QQmlEngine* eng)
 {
 
     QSqlDatabase database;
@@ -175,9 +175,13 @@ QSqlDatabase LocalStorageDatabase::openDatabase(const QString &name)
     if (QSqlDatabase::connectionNames().contains(hash_name)) {
         database = QSqlDatabase::database(hash_name);
         return database;
-    } else {
-        throw LocalStorageDatabaseException("unable to open database - although it should really be open");
     }
+
+    if (eng != nullptr) {
+        return LocalStorageDatabase::openDatabase(  LocalStorageDatabase::getLocalStoragePath(eng) , name );
+    }
+
+    throw LocalStorageDatabaseException("unable to open database");
 }
 
 QString LocalStorageDatabase::getDatabaseBasename(const QString &storagePath, const QString &dbname)
@@ -192,12 +196,19 @@ QString LocalStorageDatabase::getDatabaseBasename(const QString &storagePath, co
 QString LocalStorageDatabase::getLocalStoragePath()
 {
     QQmlEngine* engine =  qmlEngine(this);
+    return LocalStorageDatabase::getLocalStoragePath(engine);
+}
+
+QString LocalStorageDatabase::getLocalStoragePath(QQmlEngine* eng)
+{
+    QQmlEngine* engine =  eng;
     if (!engine) {
         throw LocalStorageDatabaseException("not running within the context of a qmlengine");
     }
     QString offlineStoragePath = engine->offlineStoragePath();
     return offlineStoragePath;
 }
+
 
 QString LocalStorageDatabase::getDatabaseId(const QString &name)
 {

@@ -16,7 +16,8 @@ LocalStorageTableModel::LocalStorageTableModel(
         QSqlDatabase database,
         const QString& tableName,
         bool addNew,
-        const QString& addNewText
+        bool sorted,
+        const QString& sortRole
         )
     : QSqlTableModel(parent,database),
       addRowEnabled_(addNew),
@@ -24,17 +25,21 @@ LocalStorageTableModel::LocalStorageTableModel(
       filterApplied_(false),
       nextIdValue_(-1),
       lastRowAddedIndex_(-1),
-      addNewText_(addNewText)
+      sorted_(sorted)
 {
     parentTable_ = dynamic_cast<LocalStorageTable*>(parent);
     setTable(tableName);
+
+
+    if (sorted_) {
+        int idSort = fieldIndex(sortRole);
+        if ( -1 != idSort ) {
+            setSort(idSort,Qt::SortOrder::AscendingOrder);
+        }
+    }
     setEditStrategy(QSqlTableModel::OnManualSubmit);
     select();
     generateRoleNames();
-
-    if (addNew) {
-     updateAddRowIndex();
-    }
 }
 
 
@@ -47,9 +52,6 @@ LocalStorageTableModel::~LocalStorageTableModel()
 QVariant LocalStorageTableModel::data(const QModelIndex &index, int role) const
 {
 
-    if (addRowEnabled_ && index.row() == QSqlTableModel::rowCount()) {
-        return QString("<add new>");
-    }
 
     if(index.row() >= rowCount())      {
         return QString("<invalid item>");
@@ -113,30 +115,24 @@ QString LocalStorageTableModel::textForIndex(int row_index,const QString& role)
 
 QSqlTableModel* LocalStorageTableModel::filter(const QString &field_name, const int field_value)
 {
-    int previous_row_count = QSqlTableModel::rowCount();
-    beginRemoveRows(QModelIndex(),0,qMax(0,previous_row_count -1));
-    endRemoveRows();
 
     QString filter_text = field_name + "=" + QString::number( field_value );
     setFilter(filter_text);
-
-    if (addRowEnabled_) {
-        updateAddRowIndex();
-    }
+    //select();
 
     return this;
 }
 
-void LocalStorageTableModel::addRow(
+int LocalStorageTableModel::addRow(
         const QString &idFieldName,
         const QString &valueFieldName,
         const QString &value
         )
 {
-    addRowWithFK(idFieldName,valueFieldName,value);
+    return addRowWithFK(idFieldName,valueFieldName,value);
 }
 
-void LocalStorageTableModel::addRowWithFK(
+int LocalStorageTableModel::addRowWithFK(
         const QString &idFieldName,
         const QString &valueFieldName,
         const QString &value,
@@ -165,10 +161,12 @@ void LocalStorageTableModel::addRowWithFK(
         database().commit();
         setLastRowAddedIndex(rowPosAfterAdd);
         updateAddRowIndex();
+        return nextId;
 
     } else {
 
         database().rollback();
+        return -1;
 
     }
 }
@@ -192,11 +190,9 @@ QHash<int, QByteArray> LocalStorageTableModel::roleNames() const
 
 int LocalStorageTableModel::rowCount(const QModelIndex &parent) const
 {
-    if (addRowEnabled_) {
-        return QSqlTableModel::rowCount(parent) + 1;
-    } else {
+
         return QSqlTableModel::rowCount();
-    }
+
 }
 
 bool LocalStorageTableModel::addRowEnabled() const
@@ -225,6 +221,7 @@ void LocalStorageTableModel::updateAddRowIndex()
 int LocalStorageTableModel::calculateNextId(const QString &idRoleName)
 {
     QString queryStr = QString("select max(%1) + 1 from %2").arg(idRoleName,tableName());
+
     QSqlQuery qry = database().exec(queryStr);
     while (qry.next()) {
         return  qry.value(0).toInt();

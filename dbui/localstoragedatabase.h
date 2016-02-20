@@ -19,11 +19,12 @@ public:
 
   static QSqlDatabase openDatabase( const QString& offline_storage_path, const QString& database_name, const QString& version = "1.0");
   static QSqlDatabase openDatabase( QSqlDatabase database);
-  static QSqlDatabase openDatabase( const QString& name );
+  static QSqlDatabase openDatabase( const QString& name , QQmlEngine* eng = nullptr);
 
 private:
   QString getDatabaseBasename(const QString& storagePath, const QString& dbName);
   QString getLocalStoragePath();
+  static QString getLocalStoragePath(QQmlEngine* eng);
   static QString getDatabaseId(const QString& name);
 
 

@@ -1,226 +1,232 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
+import QtQuick.Layouts 1.1
+import QtQml.StateMachine 1.0 as DSM
 import com.hempnall.dbui 1.0
+import QtQuick.Dialogs 1.1
 
-Item {    
 
-    id: item
+RowLayout {
 
-    property string idRole
-    property alias textRole : main.textRole
+    id: fd
+//    width: cmb.width + btn.width
+//    height: cmb.height + btn.height
+//    x: btn.x
+//    y: btn.y
+
+    spacing: 0
+    anchors.margins: 0
+
+    property bool addNewEnabled : false
     property LocalStorageTable table
-    property string filter
+    property string idRole
+    property alias textRole : cmb.textRole
+    property string fkFieldName
+    property int fkFieldValue
+    property int valueIndex: 0
 
-    property int current_state : state_combo
-    property int state_combo : 1
-    property int state_textedit : 2
-    property int state_validate : 3
-    property int state_identity : 4
-    property int transition_addnew : 1
-    property int transition_lostfocus : 2
-    property int transition_escape : 3
-    property int transition_accept : 4
-    property int transition_failsvalidation : 5
-    property int transition_passvalidation : 6
-    property int transition_comboselected : 7
-    property int transition_reject : 8
+    signal selectedItemChanged(string id_field_name,int id_field_value);
 
-
-    function hideEditBox() {
-        edit.text = "";
-        main.focus  = true;
-        main.visible = true;
-        main.forceActiveFocus();
-        edit.visible = false;
+    onTableChanged: {
+        addNewEnabled = table.addNew;
     }
 
-    function accept_edit(text,fkFieldName,fkFieldValue) {
-
-        if (fkFieldName == "") {
-            main.model.addRow(item.idRole, item.textRole, text);
-        } else {
-            main.model.addRowWithFK(item.idRole, item.textRole, text, fkFieldName,fkFieldValue);
-        }
-
-        hideEditBox();
-        current_state = state_identity;
-        console.log(main.model.lastRowAddedIndex);
-        main.currentIndex = main.model.lastRowAddedIndex;
-        return state_combo;
-    }
-
-    function reject_edit() {
-        hideEditBox();
-        current_state = state_identity;
-        main.currentIndex = 0;
-        return state_combo;
-    }
-
-    function combo_to_addnew(arg) {
-        console.trace();
-        edit.focus = true;
-        edit.visible = true;
-        edit.forceActiveFocus();
-        main.visible = false;
-        return state_textedit;
-    }
-
-    function combo_item_selected(currentIndex) {
-        var id = table.model.idForIndex(currentIndex,idRole);
-        var text  = table.model.textForIndex(currentIndex,main.textRole);
-        selectionChanged(currentIndex,id,text);
-        if (currentIndex == main.model.addRowIndex) {
-            return transition_combo(transition_addnew,0);
-        } else {
-            return state_combo;
-        }
-    }
-
-    function transition_combo(tran_id,arg1,arg2,arg3) {
-
-        switch (tran_id) {
-        case transition_addnew:
-            return combo_to_addnew(arg1);
-
-        case transition_comboselected:
-            return combo_item_selected(arg1);
-
-        default:
-            throw "invalid transition in combo state" + tran_id;
-        }
-    }
-
-    function transition_textedit(tran_id,arg1,arg2,arg3) {
-
-        switch (tran_id) {
-
-        case transition_lostfocus:
-        case transition_escape:
-            return reject_edit();
-
-        case transition_accept:
-            return accept_edit(arg1,arg2,arg3);
-
-        default:
-            throw "invalid transition in textedit state" + tran_id;
-        }
-    }
-
-    function transition_validate(tran_id,arg1,arg2,arg3) {
-        switch (tran_id) {
-
-        case transition_failsvalidation:
-            break;
-        case transition_passvalidation:
-            break;
-
-        default:
-            throw "invalid transition in validate state";
-        }
-    }
-
-    function transition(tran_id,arg1,arg2,arg3) {
-
-        arg1 = arg1 || "";
-        arg2 = arg2 || "";
-        arg3 = arg3 || "";
-
-
-        switch (current_state) {
-
-        case state_combo:
-            return transition_combo(tran_id,arg1,arg2,arg3);
-
-
-        case state_textedit:
-            return transition_textedit(tran_id,arg1,arg2,arg3);
-
-
-        case state_validate:
-            return  transition_validate(tran_id,arg1,arg2,arg3);
-
-        case state_identity:
-            return current_state;
-
-        default:
-            throw "invalid state"
-
-        }
-    }
-
-
-
-    FocusScope {
-
-        anchors.fill: parent
-
-
-        ComboBox {
-
-            id: main
-            model: table.model
-            anchors.fill: parent
-            visible: true
-            focus: true
-            activeFocusOnPress: true
-
-
-            onCurrentIndexChanged: {
-                current_state = transition(transition_comboselected,currentIndex);
-            }
-
-            onPressedChanged: {
-                if (pressed) {
-                    current_state = transition(transition_comboselected,currentIndex);
-                }
-            }
-
-        }
-
-        TextField {
-            id: edit
-            visible: false
-            width: main.width
-
-            anchors.verticalCenter: parent.verticalCenter
-
-            placeholderText: "Enter new value and press return"
-
-            property string fkFieldName
-            property int fkFieldValue
-
-            onActiveFocusChanged: {
-                if (!activeFocus) {
-                    current_state = transition(transition_lostfocus,0)
-                }
-            }
-
-            Keys.onEscapePressed: {
-                current_state = transition(transition_escape,0)
-            }
-
-
-            onAccepted: {
-                current_state = transition(transition_accept , text,fkFieldName,fkFieldValue);
-            }
-
-            Component.onCompleted: {
-                fkFieldName = "";
-            }
-        }
-
+    function refreshCombo() {
+        cmb.model.filter(fkFieldName,fkFieldValue);
+        cmb.refresh();
     }
 
 
     function filterItems(str,id) {
-        edit.fkFieldName = str;
-        edit.fkFieldValue = id;
-     //   main.model = table.model.filter(str,id)
+        if (str == fkFieldName && id == fkFieldValue) {
+            return;
+        }
+        fkFieldName = str;
+        fkFieldValue = id;
+        valueIndex = 0;
+        refreshCombo();
     }
 
-    signal selectionChanged(int row, int id,string name)
-    signal beginAddNew()
-    signal endAddNew()
+
+    DSM.StateMachine {
+        id: stateMachine
+        initialState: state
+        running: true
+
+        DSM.State {
+            id: state
+
+            DSM.SignalTransition {
+                targetState: edit_combo
+                signal: btn.clicked
+            }
+
+            onEntered: {
+                cmb.refresh();
+            }
+
+
+        }
+        DSM.State {
+            id: edit_combo
+            DSM.SignalTransition {
+                targetState: state
+                signal: cmb.quitEditing;
+                onTriggered: {
+                    cmb.refresh();
+                }
+            }
+
+            DSM.SignalTransition {
+                targetState: validation
+                signal: cmb.accepted;
+            }
+
+            onEntered: {
+                cmb.editable = true;
+                cmb.enabled = true;
+                cmb.currentIndex = -1;
+                btn.enabled = false
+            }
+        }
+
+        DSM.State {
+            id: validation
+            DSM.SignalTransition {
+                targetState: success_validation
+                signal: validation.valid;
+            }
+
+            DSM.SignalTransition {
+                targetState: validation_error
+                signal: validation.error;
+            }
+
+            DSM.SignalTransition {
+                signal: messageDialog.no;
+                targetState: validation_error;
+            }
+
+            onEntered: {
+                messageDialog.text = "Add [" +  fkFieldName + ","  + fkFieldValue  + "] " + cmb.editText + " to database?";
+                messageDialog.open();
+            }
+
+            signal valid();
+            signal error();
+
+            Component.onCompleted: {
+                messageDialog.no.connect(error);
+                messageDialog.yes.connect(valid);
+            }
+
+        }
+
+
+        DSM.State {
+            id: success_validation
+            DSM.SignalTransition {
+                targetState: state
+                signal: success_validation.successful_validation_complete;
+            }
+            onEntered: {
+                var enteredValue = cmb.editText
+                var nextId;
+
+                if (fkFieldName == "") {
+                    nextId = cmb.model.addRow(idRole, textRole, enteredValue);
+                    cmb.model = table.model;
+                } else {
+                    nextId = cmb.model.addRowWithFK(idRole, textRole, enteredValue, fkFieldName,fkFieldValue);
+                }
+
+                valueIndex = cmb.find(enteredValue);
+                successful_validation_complete();
+            }
+            signal successful_validation_complete;
+        }
+
+        DSM.State {
+            id: validation_error
+            DSM.SignalTransition {
+                targetState: state
+                signal: validation_error.error_processing_complete;
+            }
+            onEntered: {
+                console.log("entered error validation");
+                error_processing_complete();
+            }
+            signal error_processing_complete();
+        }
+
+        DSM.FinalState {
+            id: finalState
+        }
+        onFinished: Qt.quit()
+    }
+
+    Button {
+        id: btn
+        text: "+"
+
+        Layout.preferredWidth: 50
+        Layout.fillWidth: true
+
+        visible: addNewEnabled
+        enabled: addNewEnabled
+    }
+
+    ComboBox {
+
+        id: cmb
+        Layout.preferredWidth:100
+
+
+        model: table.model
+
+        onCurrentIndexChanged: {
+            var idx = model.idForIndex(currentIndex,idRole);
+            selectedItemChanged(idRole,idx);
+        }
+
+        Keys.onEscapePressed: {
+            quitEditing();
+        }
+
+        onActiveFocusChanged: {
+            if (!activeFocus) {
+                quitEditing();
+            }
+        }
+
+        function refresh() {
+
+            cmb.editable = false;
+            btn.enabled = addNewEnabled;
+
+            if (cmb.model.rowCount() == 0) {
+                cmb.enabled  = false;
+                cmb.currentIndex = -1;
+            } else {
+                cmb.enabled = true;
+                cmb.currentIndex = valueIndex;
+            }
+
+        }
+
+        signal quitEditing();
+
+    }
+
+
+    MessageDialog {
+        id: messageDialog
+        icon: StandardIcon.Question
+        title: "Update Database"
+
+        standardButtons: StandardButton.Yes | StandardButton.No
+    }
+
 
 }
 

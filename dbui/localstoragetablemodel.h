@@ -20,15 +20,15 @@ public:
 
 
     LocalStorageTableModel(QObject* parent = 0);
-    LocalStorageTableModel(QObject* parent, QSqlDatabase db, const QString& str,bool addNew,const QString& addNewText);
+    LocalStorageTableModel(QObject* parent, QSqlDatabase db, const QString& str,bool addNew,bool sorted = false,const QString& sortRole="");
     ~LocalStorageTableModel();
 
     Q_INVOKABLE QVariant data(const QModelIndex &index, int role=Qt::DisplayRole ) const;
     Q_INVOKABLE int  idForIndex( int id , const QString& role );
     Q_INVOKABLE QString textForIndex( int index,const QString& role);
     Q_INVOKABLE QSqlTableModel* filter(const QString& field_name, const int field_value);
-    Q_INVOKABLE void addRow(const QString& idFieldName, const QString& valueFieldName,  const QString& value);
-    Q_INVOKABLE void addRowWithFK(const QString& idFieldName, const QString& valueFieldName,   const QString& value ,const QString& fkFieldName="", const int fkValue=-1);
+    Q_INVOKABLE int addRow(const QString& idFieldName, const QString& valueFieldName,  const QString& value);
+    Q_INVOKABLE int addRowWithFK(const QString& idFieldName, const QString& valueFieldName,   const QString& value ,const QString& fkFieldName="", const int fkValue=-1);
 
 
     void generateRoleNames();
@@ -69,6 +69,7 @@ private:
     int lastRowAddedIndex_;
     void dataNotFound();
     LocalStorageTable* parentTable_;
+    bool sorted_;
 
 
 

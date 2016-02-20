@@ -1,0 +1,49 @@
+import QtQuick 2.3
+import QtTest 1.0
+import QtQuick.LocalStorage 2.0
+import com.hempnall.dbui 1.0
+import "create_data.js" as DATA
+
+TestCase {
+
+    name: "UI Tests"
+
+
+   // function modelCreate
+
+    LocalStorageDatabase {
+        id: test
+    }
+
+    property var addNewText : "<add new>"
+
+    LocalStorageTable {
+        id: sections_addnew
+        tableName: "Sections"
+        database: "QQmlExampleDB"
+        addNewText: parent.addNewText
+    }
+
+    LocalStorageTable {
+        id: items_addnew
+        tableName: "Items"
+        database: "QQmlExampleDB"
+        addNewText: parent.addNewText
+    }
+
+    function initTestCase() {
+        DATA.create_data();
+    }
+
+
+
+
+
+    function cleanupTestCase() {
+
+        DATA.clear_tables();
+    }
+
+
+
+}

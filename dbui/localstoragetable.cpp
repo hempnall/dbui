@@ -10,7 +10,7 @@ LocalStorageTable::LocalStorageTable()
 }
 
 LocalStorageTable::LocalStorageTable(  QQuickItem* parent)
-      : QQuickItem(parent),addNew_(false)
+      : QQuickItem(parent),addNew_(false),sorted_(false),sortRole_()
 {
 
 }
@@ -50,9 +50,9 @@ void LocalStorageTable::setDatabase(const QString &database)
 
 QSqlTableModel *LocalStorageTable::model() const
 {
-    QSqlDatabase database = LocalStorageDatabase::openDatabase(database_);
+    QSqlDatabase database = LocalStorageDatabase::openDatabase(database_ , qmlEngine(this));
 
-    QSqlTableModel * model = new LocalStorageTableModel((QObject*) this,database,tableName_,addNew_,addNewText_);
+    QSqlTableModel * model = new LocalStorageTableModel((QObject*) this,database,tableName_,addNew_,sorted_,sortRole_);
 
     return model;
 }
@@ -66,8 +66,6 @@ void LocalStorageTable::setHeaders(QStringList headers)
 {
     if (headers != headers_) {
         headers_ = headers;
-       // update();   // repaint with the new color
-       // emit headersChanged();
     }
 }
 
@@ -81,20 +79,34 @@ void LocalStorageTable::setAddNew(bool addNew)
     addNew_ = addNew;
 }
 
-QString LocalStorageTable::addNewText() const
+bool LocalStorageTable::sorted() const
 {
-
-    return addNewText_;
+    return sorted_;
 }
 
-void LocalStorageTable::setAddNewText(const QString &addNewText)
+void LocalStorageTable::setSorted(bool sorted)
 {
-    if (!addNewText.isEmpty()) {
-        setAddNew(true);
-    } else {
-        setAddNew(false);
+    if (sorted_ != sorted) {
+        sorted_ = sorted;
+        emit sortedChanged();
     }
-    addNewText_ = addNewText;
 }
+
+QString LocalStorageTable::sortRole() const
+{
+    return sortRole_;
+}
+
+void LocalStorageTable::setSortRole(const QString &sortRole)
+{
+    setSorted(true);
+    if (sortRole_ != sortRole) {
+        sortRole_ = sortRole;
+        emit sortRoleChanged();
+    }
+}
+
+
+
 
 
