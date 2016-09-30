@@ -113,7 +113,7 @@ QString LocalStorageTableModel::textForIndex(int row_index,const QString& role)
     return indexData.toString();
 }
 
-QSqlTableModel* LocalStorageTableModel::filter(const QString &field_name, const int field_value)
+LocalStorageTableModel* LocalStorageTableModel::filter(const QString &field_name, const int field_value)
 {
 
     QString filter_text = field_name + "=" + QString::number( field_value );
@@ -188,7 +188,7 @@ QHash<int, QByteArray> LocalStorageTableModel::roleNames() const
     return roles_;
 }
 
-int LocalStorageTableModel::rowCount(const QModelIndex &parent) const
+int LocalStorageTableModel::rowCount(const QModelIndex &) const
 {
 
         return QSqlTableModel::rowCount();

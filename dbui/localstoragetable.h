@@ -8,7 +8,7 @@
 #include <QQuickItem>
 #include <QQmlListProperty>
 #include <QSqlTableModel>
-
+#include "localstoragetablemodel.h"
 
 class LocalStorageTable
     : public QQuickItem
@@ -17,7 +17,7 @@ class LocalStorageTable
 
     Q_PROPERTY(QString tableName READ tableName WRITE setTableName NOTIFY tableNameChanged)
     Q_PROPERTY(QString database READ database WRITE setDatabase NOTIFY databaseChanged)
-    Q_PROPERTY(QSqlTableModel* model READ model NOTIFY modelChanged)
+    Q_PROPERTY(LocalStorageTableModel* model READ model NOTIFY modelChanged)
     Q_PROPERTY(QStringList headers READ headers WRITE setHeaders)
     Q_PROPERTY(bool addNew READ addNew WRITE setAddNew NOTIFY addNewChanged)
     Q_PROPERTY(bool sorted READ sorted WRITE setSorted NOTIFY sortedChanged)
@@ -35,7 +35,7 @@ public:
     QString database() const;
     void setDatabase(const QString &database);
 
-    QSqlTableModel *model() const;
+    LocalStorageTableModel *model() const;
     QStringList headers();
     void setHeaders(QStringList list);
 

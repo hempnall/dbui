@@ -26,7 +26,7 @@ public:
     Q_INVOKABLE QVariant data(const QModelIndex &index, int role=Qt::DisplayRole ) const;
     Q_INVOKABLE int  idForIndex( int id , const QString& role );
     Q_INVOKABLE QString textForIndex( int index,const QString& role);
-    Q_INVOKABLE QSqlTableModel* filter(const QString& field_name, const int field_value);
+    Q_INVOKABLE LocalStorageTableModel* filter(const QString& field_name, const int field_value);
     Q_INVOKABLE int addRow(const QString& idFieldName, const QString& valueFieldName,  const QString& value);
     Q_INVOKABLE int addRowWithFK(const QString& idFieldName, const QString& valueFieldName,   const QString& value ,const QString& fkFieldName="", const int fkValue=-1);
 
@@ -34,7 +34,7 @@ public:
     void generateRoleNames();
 
     virtual QHash<int, QByteArray> roleNames() const;
-    virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
+    Q_INVOKABLE virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
 
     bool addRowEnabled() const;
     void setAddRowEnabled(bool addRowEnabled);
@@ -60,10 +60,11 @@ private:
     QHash<int, QByteArray> roles_;
     bool addRowEnabled_;
     int addRowIndex_;
+    bool filterApplied_;
     int nextIdValue_;
     QString addNewText_;
 
-    bool filterApplied_;
+
     QString foreignKeyFieldId_;
     QString foreignKeyFieldName_;
     int lastRowAddedIndex_;

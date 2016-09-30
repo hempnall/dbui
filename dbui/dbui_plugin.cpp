@@ -13,7 +13,7 @@ void DbuiPlugin::registerTypes(const char *uri)
     qmlRegisterType<LocalStorageTable>(uri, 1, 0, "LocalStorageTable");
     qmlRegisterType<LocalStorageTableModel>(uri, 1, 0, "LocalStorageTableModel");
     qmlRegisterType<LocalStorageDatabase>(uri, 1, 0, "LocalStorageDatabase");
-
+   //  qRegisterMetaType<LocalStorageTableModel*>("LocalStorageTableModel*");
 }
 
 

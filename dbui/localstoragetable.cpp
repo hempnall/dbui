@@ -10,7 +10,7 @@ LocalStorageTable::LocalStorageTable()
 }
 
 LocalStorageTable::LocalStorageTable(  QQuickItem* parent)
-      : QQuickItem(parent),addNew_(false),sorted_(false),sortRole_()
+      : QQuickItem(parent),sortRole_(),addNew_(false),sorted_(false)
 {
 
 }
@@ -48,11 +48,18 @@ void LocalStorageTable::setDatabase(const QString &database)
     }
 }
 
-QSqlTableModel *LocalStorageTable::model() const
+LocalStorageTableModel *LocalStorageTable::model() const
 {
     QSqlDatabase database = LocalStorageDatabase::openDatabase(database_ , qmlEngine(this));
 
-    QSqlTableModel * model = new LocalStorageTableModel((QObject*) this,database,tableName_,addNew_,sorted_,sortRole_);
+    LocalStorageTableModel * model =
+            new LocalStorageTableModel(
+                (QObject*) this,
+                database,
+                tableName_,
+                addNew_,
+                sorted_,
+                sortRole_);
 
     return model;
 }

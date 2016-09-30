@@ -37,6 +37,7 @@ TestCase {
 
 
     function test_normal() {
+
         compare(  sections.model.textForIndex(0,"section_name") ,"dairy" );
         compare( sections.model.textForIndex(2,"section_name"),"meat"  );
         compare(  spy.count,0);
