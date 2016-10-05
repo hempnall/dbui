@@ -16,11 +16,14 @@ struct ShoppingListItem {
 class ShoppingListItemTableModel
     : public QAbstractItemModel
 {
+    Q_OBJECT
+
     QVector<ShoppingListItem> items_;
 
 public:
     ShoppingListItemTableModel();
     Q_INVOKABLE QVariant data(const QModelIndex &index, int role=Qt::DisplayRole ) const;
+    Q_INVOKABLE void datadata( int x , int y  ) ;
 
     virtual QHash<int, QByteArray> roleNames() const;
     Q_INVOKABLE virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -29,6 +32,10 @@ public:
     void generateRoleNames();
     QHash<int, QByteArray> roles_;
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
+
+
+
+
 
 signals:
 

@@ -28,6 +28,9 @@ QModelIndex ShoppingListItemTableModel::parent(const QModelIndex &child) const {
     return QModelIndex();
 }
 
+
+
+
 QModelIndex ShoppingListItemTableModel::index(int row, int column, const QModelIndex &parent) const {
     return createIndex(row,column);
 }
@@ -56,6 +59,14 @@ QVariant ShoppingListItemTableModel::data(
 
 }
 
+void ShoppingListItemTableModel::datadata( int x , int y)
+{
+    qDebug() << "datadata";
+    beginInsertRows( QModelIndex() , items_.size()  , items_.size()  );
+    items_.push_back(  { 9 , 9 }  );
+    endInsertRows();
+}
+
 void ShoppingListItemTableModel::generateRoleNames()    {
 
    roles_[Qt::UserRole + 0 + 1] = QVariant("Quantity").toByteArray();
@@ -66,3 +77,5 @@ void ShoppingListItemTableModel::generateRoleNames()    {
 QHash<int, QByteArray> ShoppingListItemTableModel::roleNames() const    {
     return roles_;
 }
+
+

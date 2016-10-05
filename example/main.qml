@@ -1,9 +1,8 @@
 import QtQuick 2.4
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.4
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
-
-//import com.hempnall.dbui 1.0
+import com.hempnall.dbui 1.0
 import DBDB 1.0
 
 
@@ -26,7 +25,9 @@ ApplicationWindow {
         text: "Close"
         shortcut: StandardKey.Quit
         enabled: txtQuantity.length > 0
-        onTriggered: console.log("hello")
+        onTriggered: {
+            shopping_list.datadata( 9 ,9) ;
+        }
     }
 
     ColumnLayout {
@@ -95,11 +96,12 @@ ApplicationWindow {
         }
 
 
-        ABCD {
+        ShoppingListView {
 
             Layout.fillWidth: true
             id: fred
             Layout.fillHeight: true
+            model: shopping_list
         }
 
 

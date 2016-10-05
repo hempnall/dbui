@@ -49,10 +49,12 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = main.cpp \
-		shoppinglistitemtablemodel.cpp qrc_qml.cpp
+		shoppinglistitemtablemodel.cpp qrc_qml.cpp \
+		moc_shoppinglistitemtablemodel.cpp
 OBJECTS       = main.o \
 		shoppinglistitemtablemodel.o \
-		qrc_qml.o
+		qrc_qml.o \
+		moc_shoppinglistitemtablemodel.o
 DIST          = ../../../../Qt/5.5/clang_64/mkspecs/features/spec_pre.prf \
 		../../../../Qt/5.5/clang_64/mkspecs/qdevice.pri \
 		../../../../Qt/5.5/clang_64/mkspecs/features/device_config.prf \
@@ -585,12 +587,24 @@ compiler_rcc_make_all: qrc_qml.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_qml.cpp
 qrc_qml.cpp: qml.qrc \
-		ABCD.qml \
+		ShoppingListView.qml \
 		main.qml
 	/Users/James/Qt/5.5/clang_64/bin/rcc -name qml qml.qrc -o qrc_qml.cpp
 
-compiler_moc_header_make_all:
+compiler_moc_header_make_all: moc_shoppinglistitemtablemodel.cpp
 compiler_moc_header_clean:
+	-$(DEL_FILE) moc_shoppinglistitemtablemodel.cpp
+moc_shoppinglistitemtablemodel.cpp: ../../../../Qt/5.5/clang_64/lib/QtCore.framework/Headers/QVector \
+		../../../../Qt/5.5/clang_64/lib/QtCore.framework/Headers/qvector.h \
+		../../../../Qt/5.5/clang_64/lib/QtCore.framework/Headers/QHash \
+		../../../../Qt/5.5/clang_64/lib/QtCore.framework/Headers/qhash.h \
+		../../../../Qt/5.5/clang_64/lib/QtCore.framework/Headers/QByteArray \
+		../../../../Qt/5.5/clang_64/lib/QtCore.framework/Headers/qbytearray.h \
+		../../../../Qt/5.5/clang_64/lib/QtCore.framework/Headers/QAbstractItemModel \
+		../../../../Qt/5.5/clang_64/lib/QtCore.framework/Headers/qabstractitemmodel.h \
+		shoppinglistitemtablemodel.h
+	/Users/James/Qt/5.5/clang_64/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -I/Users/James/Qt/5.5/clang_64/mkspecs/macx-clang -I/Users/James/dev/projects/dbui/example -I/Users/James/Qt/5.5/clang_64/lib/QtQuick.framework/Headers -I/Users/James/Qt/5.5/clang_64/lib/QtGui.framework/Headers -I/Users/James/Qt/5.5/clang_64/lib/QtQml.framework/Headers -I/Users/James/Qt/5.5/clang_64/lib/QtNetwork.framework/Headers -I/Users/James/Qt/5.5/clang_64/lib/QtCore.framework/Headers -F/Users/James/Qt/5.5/clang_64/lib shoppinglistitemtablemodel.h -o moc_shoppinglistitemtablemodel.cpp
+
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
 compiler_rez_source_make_all:
@@ -601,7 +615,7 @@ compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: compiler_rcc_clean 
+compiler_clean: compiler_rcc_clean compiler_moc_header_clean 
 
 ####### Compile
 
@@ -635,6 +649,9 @@ shoppinglistitemtablemodel.o: shoppinglistitemtablemodel.cpp shoppinglistitemtab
 
 qrc_qml.o: qrc_qml.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_qml.o qrc_qml.cpp
+
+moc_shoppinglistitemtablemodel.o: moc_shoppinglistitemtablemodel.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_shoppinglistitemtablemodel.o moc_shoppinglistitemtablemodel.cpp
 
 ####### Install
 
