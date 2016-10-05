@@ -1,6 +1,7 @@
 
 
 function create_data() {
+
     var db = LocalStorage.openDatabaseSync("QQmlExampleDB", "1.0", "The Example QML SQL!", 1000000);
 
     db.transaction(

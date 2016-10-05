@@ -11,13 +11,16 @@
 
 
 
-static QString qmlsqldatabase_databasesPath(const QString& offline_storage_path)
+static QString qmlsqldatabase_databasesPath(
+        const QString& offline_storage_path)
 {
-    return offline_storage_path +
-           QDir::separator() + QLatin1String("Databases");
+    return offline_storage_path
+           +  QDir::separator()
+           + QLatin1String("Databases");
 }
 
-static void qmlsqldatabase_initDatabasesPath(const QString& offline_storage_path)
+static void qmlsqldatabase_initDatabasesPath(
+        const QString& offline_storage_path)
 {
     QString databasesPath = qmlsqldatabase_databasesPath(offline_storage_path);
     if (!QDir().mkpath(databasesPath)) {
@@ -25,7 +28,9 @@ static void qmlsqldatabase_initDatabasesPath(const QString& offline_storage_path
     }
 }
 
-static QString qmlsqldatabase_databaseFile(const QString& connectionName, const QString& offline_storage_path)
+static QString qmlsqldatabase_databaseFile(
+        const QString& connectionName,
+        const QString& offline_storage_path)
 {
     return qmlsqldatabase_databasesPath(offline_storage_path) + QDir::separator() + connectionName;
 }
@@ -50,8 +55,8 @@ bool LocalStorageDatabase::create(const QString &dbname)
         QString offlineStoragePath = getLocalStoragePath();
         LocalStorageDatabase::openDatabase(offlineStoragePath,dbname);
         return true;
-    } catch (LocalStorageDatabaseException& ex) {
 
+    } catch (LocalStorageDatabaseException& ex) {
         return false;
     }
 }

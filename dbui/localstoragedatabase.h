@@ -8,6 +8,7 @@ class LocalStorageDatabase
         : public QQuickItem
 {
     Q_OBJECT
+
 public:
   LocalStorageDatabase();
   LocalStorageDatabase(QQuickItem *parent );
@@ -17,9 +18,16 @@ public:
   Q_INVOKABLE bool remove(const QString& );
   Q_INVOKABLE bool forcedelete(const QString& );
 
-  static QSqlDatabase openDatabase( const QString& offline_storage_path, const QString& database_name, const QString& version = "1.0");
+  static QSqlDatabase openDatabase(
+          const QString& offline_storage_path,
+          const QString& database_name,
+          const QString& version = "1.0");
+
   static QSqlDatabase openDatabase( QSqlDatabase database);
-  static QSqlDatabase openDatabase( const QString& name , QQmlEngine* eng = nullptr);
+
+  static QSqlDatabase openDatabase(
+          const QString& name ,
+          QQmlEngine* eng = nullptr);
 
 private:
   QString getDatabaseBasename(const QString& storagePath, const QString& dbName);
