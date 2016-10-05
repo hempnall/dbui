@@ -1,9 +1,9 @@
 import QtQuick 2.4
-import QtQuick.Controls 1.4
+import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 
-import com.hempnall.dbui 1.0
+//import com.hempnall.dbui 1.0
 import DBDB 1.0
 
 
@@ -38,13 +38,25 @@ ApplicationWindow {
 
         GridLayout {
 
+
+            id: topGrid
            anchors.fill: parent
-           anchors.top: parent.top
-           columns: 4
+          // anchors.top: parent.top
+           columns: 5
            Layout.fillWidth: true;
+
+
            flow: GridLayout.LeftToRight
 
+           Button {
+               id: asd
+                text: "Press Me!"
+               Layout.fillWidth: true
+
+           }
+
            Label {
+               color: "red"
                text: "Quantity"
            }
 
@@ -59,23 +71,35 @@ ApplicationWindow {
            }
 
            TextField {
+
                text: "Hello World"
                Layout.fillWidth: true
+
            }
         }
 
 
 
+        RowLayout {
 
-    ABCD {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
-  Layout.fillWidth: true
+            Rectangle {
+                color: "orange"
+                // Layout.fillHeight: true
+                Layout.fillWidth: true
+                height: 200
+            }
+
+        }
 
 
-        id: fred
-//        width: 100
-       height: 100
+        ABCD {
 
+            Layout.fillWidth: true
+            id: fred
+            Layout.fillHeight: true
         }
 
 
@@ -83,6 +107,7 @@ ApplicationWindow {
 
 
         RowLayout {
+
 
             Layout.fillWidth: true
 
